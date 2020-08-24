@@ -241,7 +241,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.getType()).thenReturn(StackType.DATALAKE);
         when(stackMock.getRegion()).thenReturn(REGION);
-        when(stackMock.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(stackMock.getName()).thenReturn("stackname");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);

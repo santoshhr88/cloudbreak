@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -70,7 +69,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
         MDCBuilder.buildMdcContext(stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = location(region(stack.getRegion()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

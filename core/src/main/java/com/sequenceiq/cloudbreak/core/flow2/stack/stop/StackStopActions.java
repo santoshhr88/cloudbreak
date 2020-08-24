@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -135,7 +134,7 @@ public class StackStopActions {
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
-            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+            Location location = location(region(stack.getRegion()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

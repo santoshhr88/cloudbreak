@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AzureNetworkV4InstanceGroupParameters extends MappableBase implements JsonEntity {
+public class InstanceGroupAzureNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String subnetId;

@@ -86,7 +86,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareTags(source, stackV4Request);
         prepareTelemetryRequest(source, stackV4Request);
         prepareDatalakeRequest(source, stackV4Request);
-        stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
+        stackV4Request.setPlacement(getPlacementSettings(source.getRegion()));
         prepareInputs(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
         return stackV4Request;
@@ -111,10 +111,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private PlacementSettingsV4Request getPlacementSettings(String region, String availabilityZone) {
+    private PlacementSettingsV4Request getPlacementSettings(String region) {
         PlacementSettingsV4Request ps = new PlacementSettingsV4Request();
         ps.setRegion(region);
-        ps.setAvailabilityZone(availabilityZone);
         return ps;
     }
 

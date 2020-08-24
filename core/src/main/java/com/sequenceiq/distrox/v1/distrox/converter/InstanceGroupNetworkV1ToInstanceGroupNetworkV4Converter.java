@@ -11,14 +11,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.AwsNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.AzureNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.MockNetworkV4InstanceGroupParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupMockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsInstanceGroupNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureInstanceGroupNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockInstanceGroupNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.InstanceGroupAzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.InstanceGroupMockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -27,7 +27,7 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
 
     private static final String NO_SUBNET_ID_FOUND_MESSAGE = "No subnet id found for this environment.";
 
-    public InstanceGroupNetworkV4Request convertToNetworkV4Request(Pair<InstanceGroupNetworkV1Request, DetailedEnvironmentResponse> network) {
+    public InstanceGroupNetworkV4Request convertToInstanceGroupNetworkV4Request(Pair<InstanceGroupNetworkV1Request, DetailedEnvironmentResponse> network) {
         EnvironmentNetworkResponse value = network.getValue().getNetwork();
         InstanceGroupNetworkV1Request key = network.getKey();
         if (key == null) {
@@ -51,26 +51,26 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
         return request;
     }
 
-    private MockNetworkV4InstanceGroupParameters getMockNetworkParameters(Optional<MockInstanceGroupNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
-        MockInstanceGroupNetworkV1Parameters params = mock.orElse(new MockInstanceGroupNetworkV1Parameters());
+    private InstanceGroupMockNetworkV4Parameters getMockNetworkParameters(Optional<InstanceGroupMockNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
+        InstanceGroupMockNetworkV1Parameters params = mock.orElse(new InstanceGroupMockNetworkV1Parameters());
         return convertToMockNetworkParams(new ImmutablePair<>(params, value));
     }
 
-    private AzureNetworkV4InstanceGroupParameters getAzureNetworkParameters(Optional<AzureInstanceGroupNetworkV1Parameters> azure, EnvironmentNetworkResponse value) {
-        AzureInstanceGroupNetworkV1Parameters params = azure.orElse(new AzureInstanceGroupNetworkV1Parameters());
+    private InstanceGroupAzureNetworkV4Parameters getAzureNetworkParameters(Optional<InstanceGroupAzureNetworkV1Parameters> azure, EnvironmentNetworkResponse value) {
+        InstanceGroupAzureNetworkV1Parameters params = azure.orElse(new InstanceGroupAzureNetworkV1Parameters());
         return convertToAzureStackRequest(new ImmutablePair<>(params, value));
     }
 
-    private AwsNetworkV4InstanceGroupParameters getAwsNetworkParameters(Optional<AwsInstanceGroupNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
-        AwsInstanceGroupNetworkV1Parameters params = key.orElse(new AwsInstanceGroupNetworkV1Parameters());
+    private InstanceGroupAwsNetworkV4Parameters getAwsNetworkParameters(Optional<InstanceGroupAwsNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
+        InstanceGroupAwsNetworkV1Parameters params = key.orElse(new InstanceGroupAwsNetworkV1Parameters());
         return convertToAwsStackRequest(new ImmutablePair<>(params, value));
     }
 
-    private MockNetworkV4InstanceGroupParameters convertToMockNetworkParams(Pair<MockInstanceGroupNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+    private InstanceGroupMockNetworkV4Parameters convertToMockNetworkParams(Pair<InstanceGroupMockNetworkV1Parameters, EnvironmentNetworkResponse> source) {
         EnvironmentNetworkResponse value = source.getValue();
-        MockInstanceGroupNetworkV1Parameters key = source.getKey();
+        InstanceGroupMockNetworkV1Parameters key = source.getKey();
 
-        MockNetworkV4InstanceGroupParameters params = new MockNetworkV4InstanceGroupParameters();
+        InstanceGroupMockNetworkV4Parameters params = new InstanceGroupMockNetworkV4Parameters();
 
         if (key != null) {
             String subnetId = key.getSubnetId();
@@ -83,11 +83,11 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
         return params;
     }
 
-    private AzureNetworkV4InstanceGroupParameters convertToAzureStackRequest(Pair<AzureInstanceGroupNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+    private InstanceGroupAzureNetworkV4Parameters convertToAzureStackRequest(Pair<InstanceGroupAzureNetworkV1Parameters, EnvironmentNetworkResponse> source) {
         EnvironmentNetworkResponse value = source.getValue();
-        AzureInstanceGroupNetworkV1Parameters key = source.getKey();
+        InstanceGroupAzureNetworkV1Parameters key = source.getKey();
 
-        AzureNetworkV4InstanceGroupParameters response = new AzureNetworkV4InstanceGroupParameters();
+        InstanceGroupAzureNetworkV4Parameters response = new InstanceGroupAzureNetworkV4Parameters();
 
         if (key != null) {
             String subnetId = key.getSubnetId();
@@ -101,10 +101,10 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
         return response;
     }
 
-    private AwsNetworkV4InstanceGroupParameters convertToAwsStackRequest(Pair<AwsInstanceGroupNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        AwsInstanceGroupNetworkV1Parameters key = source.getKey();
+    private InstanceGroupAwsNetworkV4Parameters convertToAwsStackRequest(Pair<InstanceGroupAwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+        InstanceGroupAwsNetworkV1Parameters key = source.getKey();
 
-        AwsNetworkV4InstanceGroupParameters response = new AwsNetworkV4InstanceGroupParameters();
+        InstanceGroupAwsNetworkV4Parameters response = new InstanceGroupAwsNetworkV4Parameters();
 
         if (key != null) {
             String subnetId = key.getSubnetId();
@@ -125,14 +125,14 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
         return response;
     }
 
-    private AzureInstanceGroupNetworkV1Parameters convertToDistroXRequest(AzureNetworkV4InstanceGroupParameters source) {
-        AzureInstanceGroupNetworkV1Parameters response = new AzureInstanceGroupNetworkV1Parameters();
+    private InstanceGroupAzureNetworkV1Parameters convertToDistroXRequest(InstanceGroupAzureNetworkV4Parameters source) {
+        InstanceGroupAzureNetworkV1Parameters response = new InstanceGroupAzureNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;
     }
 
-    private AwsInstanceGroupNetworkV1Parameters convertToDistroXRequest(AwsNetworkV4InstanceGroupParameters source) {
-        AwsInstanceGroupNetworkV1Parameters response = new AwsInstanceGroupNetworkV1Parameters();
+    private InstanceGroupAwsNetworkV1Parameters convertToDistroXRequest(InstanceGroupAwsNetworkV4Parameters source) {
+        InstanceGroupAwsNetworkV1Parameters response = new InstanceGroupAwsNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;
     }

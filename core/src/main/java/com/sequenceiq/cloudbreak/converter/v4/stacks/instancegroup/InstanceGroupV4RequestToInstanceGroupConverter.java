@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 
 @Component
@@ -36,7 +37,25 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
+        if (source.getNetwork() != null) {
+            instanceGroup.setNetwork(getInstanceGroupNetwork(source));
+        }
+
         return instanceGroup;
+    }
+
+    public InstanceGroupNetwork getInstanceGroupNetwork(InstanceGroupV4Request source) {
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform(source.getCloudPlatform().name());
+        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
+        if (parameters != null) {
+            try {
+                instanceGroupNetwork.setAttributes(new Json(parameters));
+            } catch (IllegalArgumentException ignored) {
+                throw new BadRequestException("Invalid parameters");
+            }
+        }
+        return instanceGroupNetwork;
     }
 
     private void addInstanceMetadatas(InstanceGroupV4Request request, InstanceGroup instanceGroup) {

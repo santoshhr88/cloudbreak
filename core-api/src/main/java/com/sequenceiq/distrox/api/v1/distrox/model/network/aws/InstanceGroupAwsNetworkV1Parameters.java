@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AwsInstanceGroupNetworkV1Parameters implements Serializable {
+public class InstanceGroupAwsNetworkV1Parameters implements Serializable {
 
     @ApiModelProperty
     private String subnetId;

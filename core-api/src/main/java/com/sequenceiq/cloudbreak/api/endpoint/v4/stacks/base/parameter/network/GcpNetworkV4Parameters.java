@@ -22,6 +22,9 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
     private String networkId;
 
     @ApiModelProperty
+    private String subnetId;
+
+    @ApiModelProperty
     private String sharedProjectId;
 
     @ApiModelProperty
@@ -36,6 +39,14 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     public void setNetworkId(String networkId) {
         this.networkId = networkId;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
     }
 
     public String getSharedProjectId() {
@@ -66,6 +77,7 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "subnetId", subnetId);
         putIfValueNotNull(map, "sharedProjectId", sharedProjectId);
         putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
         putIfValueNotNull(map, "noPublicIp", noPublicIp);
@@ -82,6 +94,7 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
     @Override
     public void parse(Map<String, Object> parameters) {
         networkId = getParameterOrNull(parameters, "networkId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
         sharedProjectId = getParameterOrNull(parameters, "sharedProjectId");
         noFirewallRules = getBoolean(parameters, "noFirewallRules");
         noPublicIp = getBoolean(parameters, "noPublicIp");

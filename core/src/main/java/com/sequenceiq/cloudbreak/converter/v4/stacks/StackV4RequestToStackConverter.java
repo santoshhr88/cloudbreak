@@ -28,10 +28,17 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupGcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupMockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupOpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -57,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -190,7 +198,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStack(StackV4Request source, Stack stack) {
         validateStackAuthentication(source);
         stack.setName(source.getName());
-        stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
         updateCustomDomainOrKerberos(source, stack);
     }
@@ -230,7 +237,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStackTemplate(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (environment != null) {
             updateCloudPlatformAndRelatedFields(source, stack, environment);
-            stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
         stack.setType(StackType.TEMPLATE);
         stack.setName(UUID.randomUUID().toString());
@@ -325,13 +331,67 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
-                    return getConversionService().convert(ig, InstanceGroup.class);
+                    InstanceGroup convert = getConversionService().convert(ig, InstanceGroup.class);
+                    if (convert.getNetwork () == null) {
+                        convert.setNetwork(getInstanceGroupNetwork(source));
+                    }
+                    return convert;
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
                 });
         return convertedSet;
+    }
+
+    private InstanceGroupNetwork getInstanceGroupNetwork(StackV4Request source) {
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+
+        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
+        instanceGroupNetworkV4Request.setCloudPlatform(source.getCloudPlatform());
+        switch (source.getCloudPlatform()) {
+            case AWS:
+                InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
+                aws.setSubnetId(source.getNetwork().getAws().getSubnetId());
+                instanceGroupNetworkV4Request.setAws(aws);
+                break;
+            case AZURE:
+                InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
+                azure.setSubnetId(source.getNetwork().getAzure().getSubnetId());
+                instanceGroupNetworkV4Request.setAzure(azure);
+                break;
+            case YARN:
+                InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
+                instanceGroupNetworkV4Request.setYarn(yarn);
+                break;
+            case MOCK:
+                InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
+                mock.setSubnetId(source.getNetwork().getMock().getSubnetId());
+                instanceGroupNetworkV4Request.setMock(mock);
+                break;
+            case GCP:
+                InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
+                gcp.setSubnetId(source.getNetwork().getGcp().getSubnetId());
+                instanceGroupNetworkV4Request.setGcp(gcp);
+                break;
+            case OPENSTACK:
+                InstanceGroupOpenStackNetworkV4Parameters openstack = new InstanceGroupOpenStackNetworkV4Parameters();
+                openstack.setSubnetId(source.getNetwork().getOpenstack().getSubnetId());
+                instanceGroupNetworkV4Request.setOpenstack(openstack);
+                break;
+            default:
+                break;
+        }
+
+        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
+        if (parameters != null) {
+            try {
+                instanceGroupNetwork.setAttributes(new Json(parameters));
+            } catch (IllegalArgumentException ignored) {
+                throw new BadRequestException("Invalid parameters");
+            }
+        }
+        return instanceGroupNetwork;
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {

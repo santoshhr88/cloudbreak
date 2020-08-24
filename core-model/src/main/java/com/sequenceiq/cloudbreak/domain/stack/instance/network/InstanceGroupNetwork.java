@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.domain.stack.instance.network;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -6,15 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 @Where(clause = "archived = false")
@@ -31,13 +29,6 @@ public class InstanceGroupNetwork implements ProvisionEntity {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
-
-    @Column(nullable = false)
-    @Convert(converter = OutboundInternetTrafficConverter.class)
-    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
-
-    @ManyToOne
-    private Topology topology;
 
     public Long getId() {
         return id;
@@ -61,22 +52,6 @@ public class InstanceGroupNetwork implements ProvisionEntity {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
-    }
-
-    public OutboundInternetTraffic getOutboundInternetTraffic() {
-        return outboundInternetTraffic;
-    }
-
-    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
-        this.outboundInternetTraffic = outboundInternetTraffic;
-    }
-
-    public Topology getTopology() {
-        return topology;
-    }
-
-    public void setTopology(Topology topology) {
-        this.topology = topology;
     }
 
 }

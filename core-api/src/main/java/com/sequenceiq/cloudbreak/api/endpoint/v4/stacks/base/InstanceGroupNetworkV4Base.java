@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.AwsNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.AzureNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.GcpNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.MockNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.OpenStackNetworkV4InstanceGroupParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.YarnNetworkV4InstanceGroupParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupGcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupMockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupOpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
@@ -15,112 +15,112 @@ import io.swagger.annotations.ApiModelProperty;
 public class InstanceGroupNetworkV4Base extends ProviderParametersBase implements JsonEntity {
 
     @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
-    private AwsNetworkV4InstanceGroupParameters aws;
+    private InstanceGroupAwsNetworkV4Parameters aws;
 
     @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
-    private GcpNetworkV4InstanceGroupParameters gcp;
+    private InstanceGroupGcpNetworkV4Parameters gcp;
 
     @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
-    private AzureNetworkV4InstanceGroupParameters azure;
+    private InstanceGroupAzureNetworkV4Parameters azure;
 
     @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
-    private OpenStackNetworkV4InstanceGroupParameters openstack;
+    private InstanceGroupOpenStackNetworkV4Parameters openstack;
 
     @ApiModelProperty(hidden = true)
-    private MockNetworkV4InstanceGroupParameters mock;
+    private InstanceGroupMockNetworkV4Parameters mock;
 
     @ApiModelProperty(hidden = true)
-    private YarnNetworkV4InstanceGroupParameters yarn;
+    private InstanceGroupYarnNetworkV4Parameters yarn;
 
     @Override
-    public MockNetworkV4InstanceGroupParameters createMock() {
+    public InstanceGroupMockNetworkV4Parameters createMock() {
         if (mock == null) {
-            mock = new MockNetworkV4InstanceGroupParameters();
+            mock = new InstanceGroupMockNetworkV4Parameters();
         }
         return mock;
     }
 
-    public void setMock(MockNetworkV4InstanceGroupParameters mock) {
+    public void setMock(InstanceGroupMockNetworkV4Parameters mock) {
         this.mock = mock;
     }
 
-    public AwsNetworkV4InstanceGroupParameters createAws() {
+    public InstanceGroupAwsNetworkV4Parameters createAws() {
         if (aws == null) {
-            aws = new AwsNetworkV4InstanceGroupParameters();
+            aws = new InstanceGroupAwsNetworkV4Parameters();
         }
         return aws;
     }
 
-    public void setAws(AwsNetworkV4InstanceGroupParameters aws) {
+    public void setAws(InstanceGroupAwsNetworkV4Parameters aws) {
         this.aws = aws;
     }
 
-    public GcpNetworkV4InstanceGroupParameters createGcp() {
+    public InstanceGroupGcpNetworkV4Parameters createGcp() {
         if (gcp == null) {
-            gcp = new GcpNetworkV4InstanceGroupParameters();
+            gcp = new InstanceGroupGcpNetworkV4Parameters();
         }
         return gcp;
     }
 
-    public void setGcp(GcpNetworkV4InstanceGroupParameters gcp) {
+    public void setGcp(InstanceGroupGcpNetworkV4Parameters gcp) {
         this.gcp = gcp;
     }
 
-    public AzureNetworkV4InstanceGroupParameters createAzure() {
+    public InstanceGroupAzureNetworkV4Parameters createAzure() {
         if (azure == null) {
-            azure = new AzureNetworkV4InstanceGroupParameters();
+            azure = new InstanceGroupAzureNetworkV4Parameters();
         }
         return azure;
     }
 
-    public void setAzure(AzureNetworkV4InstanceGroupParameters azure) {
+    public void setAzure(InstanceGroupAzureNetworkV4Parameters azure) {
         this.azure = azure;
     }
 
-    public OpenStackNetworkV4InstanceGroupParameters createOpenstack() {
+    public InstanceGroupOpenStackNetworkV4Parameters createOpenstack() {
         if (openstack == null) {
-            openstack = new OpenStackNetworkV4InstanceGroupParameters();
+            openstack = new InstanceGroupOpenStackNetworkV4Parameters();
         }
         return openstack;
     }
 
-    public void setOpenstack(OpenStackNetworkV4InstanceGroupParameters openstack) {
+    public void setOpenstack(InstanceGroupOpenStackNetworkV4Parameters openstack) {
         this.openstack = openstack;
     }
 
     @Override
-    public YarnNetworkV4InstanceGroupParameters createYarn() {
+    public InstanceGroupYarnNetworkV4Parameters createYarn() {
         if (yarn == null) {
-            yarn = new YarnNetworkV4InstanceGroupParameters();
+            yarn = new InstanceGroupYarnNetworkV4Parameters();
         }
         return yarn;
     }
 
-    public void setYarn(YarnNetworkV4InstanceGroupParameters yarn) {
+    public void setYarn(InstanceGroupYarnNetworkV4Parameters yarn) {
         this.yarn = yarn;
     }
 
-    public AwsNetworkV4InstanceGroupParameters getAws() {
+    public InstanceGroupAwsNetworkV4Parameters getAws() {
         return aws;
     }
 
-    public GcpNetworkV4InstanceGroupParameters getGcp() {
+    public InstanceGroupGcpNetworkV4Parameters getGcp() {
         return gcp;
     }
 
-    public AzureNetworkV4InstanceGroupParameters getAzure() {
+    public InstanceGroupAzureNetworkV4Parameters getAzure() {
         return azure;
     }
 
-    public OpenStackNetworkV4InstanceGroupParameters getOpenstack() {
+    public InstanceGroupOpenStackNetworkV4Parameters getOpenstack() {
         return openstack;
     }
 
-    public MockNetworkV4InstanceGroupParameters getMock() {
+    public InstanceGroupMockNetworkV4Parameters getMock() {
         return mock;
     }
 
-    public YarnNetworkV4InstanceGroupParameters getYarn() {
+    public InstanceGroupYarnNetworkV4Parameters getYarn() {
         return yarn;
     }
 }

@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class OpenStackNetworkV4InstanceGroupParameters extends MappableBase implements JsonEntity {
+public class InstanceGroupOpenStackNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String subnetId;

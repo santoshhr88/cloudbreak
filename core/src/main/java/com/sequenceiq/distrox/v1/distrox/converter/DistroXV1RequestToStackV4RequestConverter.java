@@ -88,8 +88,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
-        request.setNetwork(getNetwork(source.getNetwork(), environment, request.getInstanceGroups()));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(source.getNetwork(), igs, environment)));
+        request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setYarn(getYarnProperties(source, environment));
@@ -124,7 +124,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, clusterConverter::convert));
         DetailedEnvironmentResponse environmentRef = environment;
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroups -> instanceGroupConverter.convertTo(instanceGroups, environmentRef)));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(),
+                instanceGroups -> instanceGroupConverter.convertTo(source.getNetwork(), instanceGroups, environmentRef)));
         if (environment != null) {
             request.setNetwork(getNetwork(source.getNetwork(), environment));
         }
@@ -148,30 +149,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
         NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment), networkConverter::convertToNetworkV4Request);
-        validateSubnetIds(network, environment);
         return network;
-    }
-
-    private void validateSubnetIds(NetworkV4Request network, DetailedEnvironmentResponse environment) {
-        switch (environment.getCloudPlatform()) {
-            case "AWS":
-                validateSubnet(network, environment, network.getAws().getSubnetId());
-                break;
-            case "AZURE":
-                validateSubnet(network, environment, network.getAzure().getSubnetId());
-                break;
-            default:
-        }
-
-    }
-
-    private void validateSubnet(NetworkV4Request network, DetailedEnvironmentResponse environment, String subnetId) {
-        if (subnetId != null && (environment == null || environment.getNetwork() == null || environment.getNetwork().getSubnetIds() == null
-                || !environment.getNetwork().getSubnetIds().contains(subnetId))) {
-            LOGGER.info("The given subnet id [{}] is not attached to the Environment [{}]. Network request: [{}]", subnetId, environment, network);
-            throw new BadRequestException(String.format("The given subnet id (%s) is not attached to the Environment (%s)",
-                    subnetId, environment.getName()));
-        }
     }
 
     private YarnStackV4Parameters getYarnProperties(DistroXV1Request source, DetailedEnvironmentResponse environment) {

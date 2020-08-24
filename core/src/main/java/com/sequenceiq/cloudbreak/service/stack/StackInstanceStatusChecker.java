@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.stream.Collectors.toList;
@@ -50,7 +49,7 @@ public class StackInstanceStatusChecker {
         if (!instanceMetaData.isEmpty()) {
             List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData);
             cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
-            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+            Location location = location(region(stack.getRegion()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = getCloudCredential(stack.getEnvironmentCrn());
