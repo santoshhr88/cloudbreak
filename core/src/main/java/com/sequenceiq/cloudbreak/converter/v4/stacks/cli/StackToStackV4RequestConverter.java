@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -157,6 +158,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV2Request.setRecipeNames(recipeNames);
                         instanceGroupV2Request.setRecoveryMode(hostGroup.getRecoveryMode());
+                        instanceGroupV2Request.setNetwork(getConversionService().convert(instanceGroup.getNetwork(), InstanceGroupNetworkV4Request.class));
                     });
         }
     }

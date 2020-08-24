@@ -19,16 +19,21 @@ import io.swagger.annotations.ApiModelProperty;
 public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
+    private String networkId;
+
+    @ApiModelProperty
     private Boolean noPublicIp;
 
     @ApiModelProperty
     private String resourceGroupName;
 
-    @ApiModelProperty
-    private String networkId;
+    public String getNetworkId() {
+        return networkId;
+    }
 
-    @ApiModelProperty
-    private String subnetId;
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
+    }
 
     public Boolean getNoPublicIp() {
         return noPublicIp;
@@ -46,29 +51,12 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.resourceGroupName = resourceGroupName;
     }
 
-    public String getNetworkId() {
-        return networkId;
-    }
-
-    public void setNetworkId(String networkId) {
-        this.networkId = networkId;
-    }
-
-    public String getSubnetId() {
-        return subnetId;
-    }
-
-    public void setSubnetId(String subnetId) {
-        this.subnetId = subnetId;
-    }
-
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "noPublicIp", noPublicIp);
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "networkId", networkId);
-        putIfValueNotNull(map, "subnetId", subnetId);
         return map;
     }
 
@@ -84,6 +72,5 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         noPublicIp = getBoolean(parameters, "noPublicIp");
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         networkId = getParameterOrNull(parameters, "networkId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
     }
 }
