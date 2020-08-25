@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 @Entity
 @Where(clause = "archived = false")
 public class InstanceGroupNetwork implements ProvisionEntity {
-    private static final String DELIMITER = ",";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancegroupnetwork_generator")
