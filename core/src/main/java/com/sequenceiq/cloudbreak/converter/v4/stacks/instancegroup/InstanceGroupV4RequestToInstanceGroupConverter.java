@@ -8,9 +8,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -38,13 +39,14 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
             addInstanceMetadatas(source, instanceGroup);
         }
         if (source.getNetwork() != null) {
-            instanceGroup.setNetwork(getInstanceGroupNetwork(source));
+            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            instanceGroup.setNetwork(getInstanceGroupNetwork(source.getNetwork()));
         }
 
         return instanceGroup;
     }
 
-    public InstanceGroupNetwork getInstanceGroupNetwork(InstanceGroupV4Request source) {
+    public InstanceGroupNetwork getInstanceGroupNetwork(InstanceGroupNetworkV4Request source) {
         InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
         instanceGroupNetwork.setCloudPlatform(source.getCloudPlatform().name());
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();

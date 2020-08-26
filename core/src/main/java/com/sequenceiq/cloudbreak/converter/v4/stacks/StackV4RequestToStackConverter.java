@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -332,8 +333,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
                     InstanceGroup convert = getConversionService().convert(ig, InstanceGroup.class);
-                    if (convert.getNetwork () == null) {
-                        convert.setNetwork(getInstanceGroupNetwork(source));
+                    if (ig.getNetwork () == null) {
+                        convert.setNetwork(getInstanceGroupNetwork(source, ig));
                     }
                     return convert;
                 })
@@ -344,7 +345,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return convertedSet;
     }
 
-    private InstanceGroupNetwork getInstanceGroupNetwork(StackV4Request source) {
+    private InstanceGroupNetwork getInstanceGroupNetwork(StackV4Request source, InstanceGroupV4Request ig) {
         InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
 
         InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
@@ -352,12 +353,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         switch (source.getCloudPlatform()) {
             case AWS:
                 InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
-                aws.setSubnetId(source.getNetwork().getAws().getSubnetId());
+                aws.setSubnetId(ig.getNetwork().getAws().getSubnetId());
                 instanceGroupNetworkV4Request.setAws(aws);
                 break;
             case AZURE:
                 InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
-                azure.setSubnetId(source.getNetwork().getAzure().getSubnetId());
+                azure.setSubnetId(ig.getNetwork().getAzure().getSubnetId());
                 instanceGroupNetworkV4Request.setAzure(azure);
                 break;
             case YARN:
@@ -366,7 +367,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 break;
             case MOCK:
                 InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
-                mock.setSubnetId(source.getNetwork().getMock().getSubnetId());
+                mock.setSubnetId(ig.getNetwork().getMock().getSubnetId());
                 instanceGroupNetworkV4Request.setMock(mock);
                 break;
             case GCP:
@@ -376,14 +377,14 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 break;
             case OPENSTACK:
                 InstanceGroupOpenStackNetworkV4Parameters openstack = new InstanceGroupOpenStackNetworkV4Parameters();
-                openstack.setSubnetId(source.getNetwork().getOpenstack().getSubnetId());
+                openstack.setSubnetId(ig.getNetwork().getOpenstack().getSubnetId());
                 instanceGroupNetworkV4Request.setOpenstack(openstack);
                 break;
             default:
                 break;
         }
 
-        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
+        Map<String, Object> parameters = providerParameterCalculator.get(ig.getNetwork()).asMap();
         if (parameters != null) {
             try {
                 instanceGroupNetwork.setAttributes(new Json(parameters));

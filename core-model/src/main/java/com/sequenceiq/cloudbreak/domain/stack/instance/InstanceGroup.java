@@ -71,7 +71,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     private String availabilityZone;
 
-    @ManyToOne
+    @OneToOne
     private InstanceGroupNetwork network;
 
     public String getGroupName() {
