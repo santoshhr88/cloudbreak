@@ -7,15 +7,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-
-import org.hibernate.annotations.Where;
+import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
-@Where(clause = "archived = false")
+@Table
 public class InstanceGroupNetwork implements ProvisionEntity {
 
     @Id
