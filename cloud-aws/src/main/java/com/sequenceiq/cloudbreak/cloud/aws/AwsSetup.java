@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -129,11 +130,20 @@ public class AwsSetup implements Setup {
     private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
         CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap(), true);
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
-        if (location.getAvailabilityZone() != null
-                && !availabilityZones.contains(location.getAvailabilityZone())) {
-            throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zone [%s]",
-                    location.getRegion().getRegionName(), location.getAvailabilityZone().value()));
+        if (location.getAvailabilityZones() != null
+                && !allAvailabilityZoneExist(availabilityZones, location.getAvailabilityZones().values())) {
+            throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zones [%s]",
+                    location.getRegion().getRegionName(), location.getAvailabilityZones().values()));
         }
+    }
+
+    private boolean allAvailabilityZoneExist(List<AvailabilityZone> providerAzs, Collection<AvailabilityZone> stackAzs) {
+        for (AvailabilityZone stackAz : stackAzs) {
+            if (!providerAzs.contains(stackAz)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void verifySpotInstances(CloudStack stack) {

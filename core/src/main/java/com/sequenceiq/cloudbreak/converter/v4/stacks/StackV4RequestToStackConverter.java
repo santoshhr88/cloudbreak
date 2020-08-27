@@ -350,46 +350,47 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
         InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
         instanceGroupNetworkV4Request.setCloudPlatform(source.getCloudPlatform());
-        switch (source.getCloudPlatform()) {
-            case AWS:
-                InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
-                aws.setSubnetId(ig.getNetwork().getAws().getSubnetId());
-                instanceGroupNetworkV4Request.setAws(aws);
-                break;
-            case AZURE:
-                InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
-                azure.setSubnetId(ig.getNetwork().getAzure().getSubnetId());
-                instanceGroupNetworkV4Request.setAzure(azure);
-                break;
-            case YARN:
-                InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
-                instanceGroupNetworkV4Request.setYarn(yarn);
-                break;
-            case MOCK:
-                InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
-                mock.setSubnetId(ig.getNetwork().getMock().getSubnetId());
-                instanceGroupNetworkV4Request.setMock(mock);
-                break;
-            case GCP:
-                InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
-                gcp.setSubnetId(source.getNetwork().getGcp().getSubnetId());
-                instanceGroupNetworkV4Request.setGcp(gcp);
-                break;
-            case OPENSTACK:
-                InstanceGroupOpenStackNetworkV4Parameters openstack = new InstanceGroupOpenStackNetworkV4Parameters();
-                openstack.setSubnetId(ig.getNetwork().getOpenstack().getSubnetId());
-                instanceGroupNetworkV4Request.setOpenstack(openstack);
-                break;
-            default:
-                break;
-        }
-
-        Map<String, Object> parameters = providerParameterCalculator.get(ig.getNetwork()).asMap();
-        if (parameters != null) {
-            try {
-                instanceGroupNetwork.setAttributes(new Json(parameters));
-            } catch (IllegalArgumentException ignored) {
-                throw new BadRequestException("Invalid parameters");
+        if (ig.getNetwork() != null) {
+            switch (source.getCloudPlatform()) {
+                case AWS:
+                    InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
+                    aws.setSubnetId(ig.getNetwork().getAws().getSubnetId());
+                    instanceGroupNetworkV4Request.setAws(aws);
+                    break;
+                case AZURE:
+                    InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
+                    azure.setSubnetId(ig.getNetwork().getAzure().getSubnetId());
+                    instanceGroupNetworkV4Request.setAzure(azure);
+                    break;
+                case YARN:
+                    InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
+                    instanceGroupNetworkV4Request.setYarn(yarn);
+                    break;
+                case MOCK:
+                    InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
+                    mock.setSubnetId(ig.getNetwork().getMock().getSubnetId());
+                    instanceGroupNetworkV4Request.setMock(mock);
+                    break;
+                case GCP:
+                    InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
+                    gcp.setSubnetId(source.getNetwork().getGcp().getSubnetId());
+                    instanceGroupNetworkV4Request.setGcp(gcp);
+                    break;
+                case OPENSTACK:
+                    InstanceGroupOpenStackNetworkV4Parameters openstack = new InstanceGroupOpenStackNetworkV4Parameters();
+                    openstack.setSubnetId(ig.getNetwork().getOpenstack().getSubnetId());
+                    instanceGroupNetworkV4Request.setOpenstack(openstack);
+                    break;
+                default:
+                    break;
+            }
+            Map<String, Object> parameters = providerParameterCalculator.get(ig.getNetwork()).asMap();
+            if (parameters != null) {
+                try {
+                    instanceGroupNetwork.setAttributes(new Json(parameters));
+                } catch (IllegalArgumentException ignored) {
+                    throw new BadRequestException("Invalid parameters");
+                }
             }
         }
         return instanceGroupNetwork;

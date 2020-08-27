@@ -77,10 +77,14 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         if (requestContainsSingleAvailabilityZone(distroxNetwork, environment)) {
             source.setNetwork(getInstanceGroupNetworkForMultiAz(distroxNetwork, source, environment));
         }
-        InstanceGroupNetworkV4Request network = getIfNotNull(new ImmutablePair<>(source.getNetwork(), environment),
-                networkConverter::convertToInstanceGroupNetworkV4Request);
-        validateSubnetIds(network, environment);
-        return network;
+        if (source.getNetwork() != null) {
+            InstanceGroupNetworkV4Request network = getIfNotNull(new ImmutablePair<>(source.getNetwork(), environment),
+                    networkConverter::convertToInstanceGroupNetworkV4Request);
+            validateSubnetIds(network, environment);
+            return network;
+        }
+        return null;
+
     }
 
     private InstanceGroupNetworkV1Request getInstanceGroupNetworkForMultiAz(NetworkV1Request distroxNetwork, InstanceGroupV1Request source, DetailedEnvironmentResponse environment) {

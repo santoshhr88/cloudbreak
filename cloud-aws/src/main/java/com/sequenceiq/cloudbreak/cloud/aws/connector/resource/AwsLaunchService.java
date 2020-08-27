@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClien
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -132,6 +134,7 @@ public class AwsLaunchService {
                     .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
                     .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
+                    .withExistingSubnetIdMap(getSubnetIdMap(stack))
                     .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                     .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
@@ -169,6 +172,15 @@ public class AwsLaunchService {
         awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
 
         return awsResourceConnector.check(ac, instances);
+    }
+
+    private Map<String, String> getSubnetIdMap(CloudStack stack) {
+        Map<String, String> subnetMap = new HashMap<>();
+        for (Group group : stack.getGroups()) {
+            AwsGroupNetworkView awsGroupNetworkView = new AwsGroupNetworkView(group.getNetwork());
+            subnetMap.put(group.getName(), awsGroupNetworkView.getExistingSubnet());
+        }
+        return subnetMap;
     }
 
     private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient cfRetryClient,

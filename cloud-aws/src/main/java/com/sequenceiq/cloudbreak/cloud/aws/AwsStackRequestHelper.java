@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsVpcSecurityGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -106,8 +107,8 @@ public class AwsStackRequestHelper {
         if (awsInstanceProfileView.isInstanceProfileAvailable()) {
             parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
         }
-        if (ac.getCloudContext().getLocation().getAvailabilityZone() != null
-                && ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
+        if (ac.getCloudContext().getLocation().getAvailabilityZones() != null
+                && allAzHasValue(ac.getCloudContext().getLocation().getAvailabilityZones().values())) {
             parameters.add(new Parameter().withParameterKey("AvailabilitySet")
                     .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
         }
@@ -123,6 +124,15 @@ public class AwsStackRequestHelper {
             }
         }
         return parameters;
+    }
+
+    private boolean allAzHasValue(Collection<AvailabilityZone> values) {
+        for (AvailabilityZone value : values) {
+            if (Strings.isNullOrEmpty(value.value())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Parameter getStackOwnerFromStack(AuthenticatedContext ac, CloudStack stack, String key, String referenceName) {

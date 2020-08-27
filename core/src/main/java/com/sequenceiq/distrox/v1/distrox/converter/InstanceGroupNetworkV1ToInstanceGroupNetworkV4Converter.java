@@ -28,7 +28,13 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
     private static final String NO_SUBNET_ID_FOUND_MESSAGE = "No subnet id found for this environment.";
 
     public InstanceGroupNetworkV4Request convertToInstanceGroupNetworkV4Request(Pair<InstanceGroupNetworkV1Request, DetailedEnvironmentResponse> network) {
-        EnvironmentNetworkResponse value = network.getValue().getNetwork();
+        DetailedEnvironmentResponse value = network.getValue();
+        EnvironmentNetworkResponse environmentNetworkResponse = null;
+        if (value == null) {
+            environmentNetworkResponse = new EnvironmentNetworkResponse();
+        } else {
+             environmentNetworkResponse = value.getNetwork();
+        }
         InstanceGroupNetworkV1Request key = network.getKey();
         if (key == null) {
             key = new InstanceGroupNetworkV1Request();
@@ -36,17 +42,19 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
 
         InstanceGroupNetworkV4Request request = new InstanceGroupNetworkV4Request();
 
-        switch (network.getValue().getCloudPlatform()) {
-            case "AWS":
-                request.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
-                break;
-            case "AZURE":
-                request.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), value));
-                break;
-            case "MOCK":
-                request.setMock(getMockNetworkParameters(Optional.ofNullable(key.getMock()), value));
-                break;
-            default:
+        if (network.getValue() != null) {
+            switch (value.getCloudPlatform()) {
+                case "AWS":
+                    request.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), environmentNetworkResponse));
+                    break;
+                case "AZURE":
+                    request.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), environmentNetworkResponse));
+                    break;
+                case "MOCK":
+                    request.setMock(getMockNetworkParameters(Optional.ofNullable(key.getMock()), environmentNetworkResponse));
+                    break;
+                default:
+            }
         }
         return request;
     }

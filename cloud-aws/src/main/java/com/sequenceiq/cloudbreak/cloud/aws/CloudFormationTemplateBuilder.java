@@ -58,7 +58,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting())),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
-                    getSubnetIds(context.existingSubnetIds, subnetCounter, group, multigw),
+                    getSubnetIds(context.existingSubnetIdMap, subnetCounter, group, multigw),
                     awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
@@ -71,7 +71,6 @@ public class CloudFormationTemplateBuilder {
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
             }
-            subnetCounter++;
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("gatewayGroups", awsGatewayGroupViews);
@@ -119,13 +118,17 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
-        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
-                ? existingSubnetIds.get(subnetCounter % existingSubnetIds.size()) : null;
+    private String getSubnetIds(Map<String, String> existingSubnetIdMap, int subnetCounter, Group group, boolean multigw) {
+        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIdMap))
+                ? existingSubnetIdMap.get(group.getName()) : null;
     }
 
     private boolean isNullOrEmptyList(Collection<?> list) {
         return list == null || list.isEmpty();
+    }
+
+    private boolean isNullOrEmptyList(Map<?, ?> map) {
+        return map == null || map.keySet().isEmpty();
     }
 
     public boolean areDedicatedInstancesRequested(CloudStack cloudStack) {
@@ -152,6 +155,8 @@ public class CloudFormationTemplateBuilder {
         private boolean existingIGW;
 
         private List<String> existingSubnetIds = new ArrayList<>();
+
+        private Map<String, String> existingSubnetIdMap = new HashMap<>();
 
         private List<String> existingSubnetCidr = new ArrayList<>();
 
@@ -207,6 +212,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withExistingSubnetIds(List<String> subnetIds) {
             existingSubnetIds = subnetIds;
+            return this;
+        }
+
+        public ModelContext withExistingSubnetIdMap(Map<String, String> existingSubnetIdMap) {
+            existingSubnetIdMap = existingSubnetIdMap;
             return this;
         }
 
