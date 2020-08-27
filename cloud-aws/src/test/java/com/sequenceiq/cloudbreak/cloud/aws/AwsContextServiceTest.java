@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -51,13 +52,13 @@ class AwsContextServiceTest {
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(2L, "worker"), mock(InstanceAuthentication.class)));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class)));
         groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty()));
+                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), new GroupNetwork()));
         ArrayList<CloudInstance> computeInstances = new ArrayList<>();
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class)));
         computeInstances.add(new CloudInstance("C2", getInstanceTemplate(5L, "compute"), mock(InstanceAuthentication.class)));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class)));
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty()));
+                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), mock(GroupNetwork.class)));
         ResourceBuilderContext context = new ResourceBuilderContext("context", Location.location(Region.region("us-west-1")), 0);
         awsContextService.addResourcesToContext(resources, context, groups);
         List<CloudResource> worker1 = context.getComputeResources(2L);

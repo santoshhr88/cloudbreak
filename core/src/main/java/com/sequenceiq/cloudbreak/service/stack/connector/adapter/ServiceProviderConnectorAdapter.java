@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.location.LocationProvider;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -75,16 +74,19 @@ public class ServiceProviderConnectorAdapter {
     @Inject
     private CredentialClientService credentialClientService;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-        Location location = location(region(stack.getRegion()));
+        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
                 CloudInstance cloudInstance = metadataConverter.convert(metaData);
@@ -112,7 +114,7 @@ public class ServiceProviderConnectorAdapter {
 
     public void deleteStack(Stack stack) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -148,7 +150,7 @@ public class ServiceProviderConnectorAdapter {
     }
 
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -168,7 +170,7 @@ public class ServiceProviderConnectorAdapter {
             }
             return res.getTemplate();
         } catch (InterruptedException e) {
-            Location location = location(region(stack.getRegion()));
+            Location location = locationProvider.provide(stack);
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
             LOGGER.error("Error while getting template: " + cloudContext, e);
@@ -182,7 +184,7 @@ public class ServiceProviderConnectorAdapter {
 
     public PlatformParameters getPlatformParameters(Stack stack) {
         LOGGER.debug("Get platform parameters for: {}", stack);
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -205,7 +207,7 @@ public class ServiceProviderConnectorAdapter {
 
     public Variant checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());

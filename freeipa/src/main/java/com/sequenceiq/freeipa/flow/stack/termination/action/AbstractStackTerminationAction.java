@@ -1,8 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +27,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationContext;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -53,6 +51,9 @@ abstract class AbstractStackTerminationAction<P extends Payload>
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     protected AbstractStackTerminationAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -62,7 +63,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
             StackTerminationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());

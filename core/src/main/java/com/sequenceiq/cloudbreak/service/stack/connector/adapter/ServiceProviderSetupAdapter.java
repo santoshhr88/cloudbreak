@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,6 +16,7 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.location.LocationProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -45,8 +43,11 @@ public class ServiceProviderSetupAdapter {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     public ImageStatusResult checkImage(Stack stack) throws Exception {
-        Location location = location(region(stack.getRegion()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
