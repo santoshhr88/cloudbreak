@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -43,8 +45,6 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         Collection<AwsGroupView> awsGroupViews = new ArrayList<>();
         Collection<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
-        int subnetCounter = 0;
-        boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
             String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
@@ -58,7 +58,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting())),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
-                    getSubnetIds(context.existingSubnetIdMap, subnetCounter, group, multigw),
+                    getSubnetIds(context.existingSubnetIdMap, group),
                     awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
@@ -118,9 +118,8 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(Map<String, String> existingSubnetIdMap, int subnetCounter, Group group, boolean multigw) {
-        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIdMap))
-                ? existingSubnetIdMap.get(group.getName()) : null;
+    private String getSubnetIds(Map<String, String> existingSubnetIdMap, Group group) {
+        return !isNullOrEmptyList(existingSubnetIdMap) ? existingSubnetIdMap.get(group.getName()) : null;
     }
 
     private boolean isNullOrEmptyList(Collection<?> list) {
@@ -154,7 +153,7 @@ public class CloudFormationTemplateBuilder {
 
         private boolean existingIGW;
 
-        private List<String> existingSubnetIds = new ArrayList<>();
+        private Set<String> existingSubnetIds = new HashSet<>();
 
         private Map<String, String> existingSubnetIdMap = new HashMap<>();
 
@@ -210,13 +209,13 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
-        public ModelContext withExistingSubnetIds(List<String> subnetIds) {
+        public ModelContext withExistingSubnetIds(Set<String> subnetIds) {
             existingSubnetIds = subnetIds;
             return this;
         }
 
-        public ModelContext withExistingSubnetIdMap(Map<String, String> existingSubnetIdMap) {
-            existingSubnetIdMap = existingSubnetIdMap;
+        public ModelContext withExistingSubnetIdMap(Map<String, String> existingSubnetIdMaps) {
+            existingSubnetIdMap = existingSubnetIdMaps;
             return this;
         }
 

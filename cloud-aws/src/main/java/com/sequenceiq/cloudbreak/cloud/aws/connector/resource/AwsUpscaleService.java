@@ -221,7 +221,7 @@ public class AwsUpscaleService {
 
     private void associateElasticIpWithNewInstances(CloudStack stack, List<CloudResource> resources, AmazonCloudFormationRetryClient cloudFormationClient,
             AmazonEC2Client amazonEC2Client, List<Group> scaledGroups, List<CloudResource> instances) {
-        boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(new AwsNetworkView(stack.getNetwork()), amazonEC2Client);
+        boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(new AwsNetworkView(stack.getNetwork(), stack), amazonEC2Client);
         List<Group> gateways = awsNetworkService.getGatewayGroups(scaledGroups);
         Map<String, List<String>> gatewayGroupInstanceMapping = createGatewayToNewInstancesMap(instances, gateways);
         if (mapPublicIpOnLaunch && !gateways.isEmpty()) {

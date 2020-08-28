@@ -111,7 +111,7 @@ public class AwsLaunchService {
         AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
         Network network = stack.getNetwork();
-        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network, stack);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
@@ -240,7 +240,7 @@ public class AwsLaunchService {
     private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVpc();
             CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
@@ -254,10 +254,14 @@ public class AwsLaunchService {
         }
 
         if (awsNetworkView.isExistingSubnet()) {
-            String subnetId = awsNetworkView.getExistingSubnet();
-            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
-            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
-            resources.add(subnet);
+            for (Group group : stack.getGroups()) {
+                AwsGroupNetworkView awsGroupNetworkView = new AwsGroupNetworkView(group.getNetwork());
+                if (awsGroupNetworkView.isExistingSubnet()) {
+                    CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(awsGroupNetworkView.getExistingSubnet()).build();
+                    resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+                    resources.add(subnet);
+                }
+            }
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
             CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();

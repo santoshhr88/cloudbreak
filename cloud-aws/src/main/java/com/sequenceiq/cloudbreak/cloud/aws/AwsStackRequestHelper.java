@@ -86,7 +86,7 @@ public class AwsStackRequestHelper {
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         String keyPairName = awsClient.getKeyPairName(ac);
         if (awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
@@ -116,11 +116,6 @@ public class AwsStackRequestHelper {
             parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(awsNetworkView.getExistingVpc()));
             if (awsNetworkView.isExistingIGW()) {
                 parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIgw()));
-            }
-            if (awsNetworkView.isExistingSubnet()) {
-                parameters.add(new Parameter().withParameterKey("SubnetId").withParameterValue(awsNetworkView.getExistingSubnet()));
-            } else {
-                parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(newSubnetCidr));
             }
         }
         return parameters;

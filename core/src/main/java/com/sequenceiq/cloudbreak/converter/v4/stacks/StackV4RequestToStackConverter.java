@@ -2,6 +2,11 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.MOCK;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -42,6 +47,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -229,6 +235,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         String cloudPlatform = determineCloudPlatform(source, environment);
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
+        for (InstanceGroupV4Request instanceGroup : source.getInstanceGroups()) {
+            instanceGroup.setAvailabilityZone(getAZBySubnetId(instanceGroup, environment, cloudPlatform));
+        }
         stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, environment));
@@ -333,6 +342,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
                     InstanceGroup convert = getConversionService().convert(ig, InstanceGroup.class);
+                    convert.setAvailabilityZone(ig.getAvailabilityZone());
                     if (ig.getNetwork () == null) {
                         convert.setNetwork(getInstanceGroupNetwork(source, ig));
                     }
@@ -394,6 +404,38 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             }
         }
         return instanceGroupNetwork;
+    }
+
+    private String getAZBySubnetId(InstanceGroupV4Request ig, DetailedEnvironmentResponse environment, String cloudPlatform) {
+        String subnetId = null;
+        if (ig.getNetwork() != null) {
+            switch (cloudPlatform) {
+                case AWS:
+                    subnetId = ig.getNetwork().getAws().getSubnetId();
+                    break;
+                case AZURE:
+                    subnetId = ig.getNetwork().getAzure().getSubnetId();
+                    break;
+                case MOCK:
+                    subnetId = ig.getNetwork().getMock().getSubnetId();
+                    break;
+                case GCP:
+                    subnetId = ig.getNetwork().getGcp().getSubnetId();
+                    break;
+                case OPENSTACK:
+                    subnetId = ig.getNetwork().getOpenstack().getSubnetId();
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (!Strings.isNullOrEmpty(subnetId)) {
+            CloudSubnet cloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+            if (cloudSubnet != null) {
+                return cloudSubnet.getAvailabilityZone();
+            }
+        }
+        return null;
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
