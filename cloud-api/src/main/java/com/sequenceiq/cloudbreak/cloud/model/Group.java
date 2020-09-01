@@ -51,8 +51,8 @@ public class Group extends DynamicModel {
     }
 
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-                 Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
-                 String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity, GroupNetwork network) {
+            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
+            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity, GroupNetwork network) {
         super(parameters);
         this.name = name;
         this.type = type;
