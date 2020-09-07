@@ -113,21 +113,46 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Override
     public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
         if (!networkDeletionRequest.isExisting()) {
-            try {
-                AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
-                if (resourceGroupExists(azureClient, networkDeletionRequest)) {
-                    azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
-                    azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
-                }
-            } catch (CloudException e) {
-                LOGGER.warn("Deletion error, cloud exception happened: ", e);
-                if (e.body() != null && e.body().details() != null) {
-                    String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                    throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
-                            e.body().code(), e.body().message(), details));
-                } else {
-                    throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
-                }
+            if (networkDeletionRequest.isSingleResourceGroup()) {
+                deleteResources(networkDeletionRequest);
+            } else {
+                deleteNetworkResourceGroup(networkDeletionRequest);
+            }
+        }
+    }
+
+    private void deleteResources(NetworkDeletionRequest networkDeletionRequest) {
+        try {
+            AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
+            azureClient.deleteNetworkInResourceGroup(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getNetworkId());
+            azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+        } catch (CloudException e) {
+            LOGGER.warn("Deletion error, cloud exception happened: ", e);
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
+                        e.body().code(), e.body().message(), details));
+            } else {
+                throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
+            }
+        }
+    }
+
+    private void deleteNetworkResourceGroup(NetworkDeletionRequest networkDeletionRequest) {
+        try {
+            AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
+            if (resourceGroupExists(azureClient, networkDeletionRequest)) {
+                azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+                azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
+            }
+        } catch (CloudException e) {
+            LOGGER.warn("Deletion error, cloud exception happened: ", e);
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
+                        e.body().code(), e.body().message(), details));
+            } else {
+                throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
             }
         }
     }
