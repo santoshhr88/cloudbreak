@@ -31,7 +31,7 @@ public class UpscaleClusterHandler implements EventHandler<UpscaleClusterRequest
         UpscaleClusterRequest request = event.getData();
         UpscaleClusterResult result;
         try {
-            clusterUpscaleService.installServicesOnNewHosts(request.getResourceId(), request.getHostGroupName());
+            clusterUpscaleService.installServicesOnNewHosts(request.getResourceId(), request.getHostGroupName(), request.isRepair());
             result = new UpscaleClusterResult(request);
         } catch (Exception e) {
             result = new UpscaleClusterResult(e.getMessage(), e, request);

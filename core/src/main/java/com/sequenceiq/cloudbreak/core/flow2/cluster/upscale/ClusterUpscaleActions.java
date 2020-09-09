@@ -164,7 +164,7 @@ public class ClusterUpscaleActions {
                             new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
                     sendEvent(context, result.selector(), result);
                 } else {
-                    UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
+                    UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName(), context.isRepair());
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -354,7 +354,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
+                UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName(), context.isRepair());
                 return new UpscaleClusterResult(request);
             }
         };
@@ -425,6 +425,8 @@ public class ClusterUpscaleActions {
 
         static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
 
+        static final String REPAIR = "REPAIR";
+
         @Inject
         private StackService stackService;
 
@@ -444,7 +446,7 @@ public class ClusterUpscaleActions {
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
             MDCBuilder.buildMdcContext(stack.getClusterView());
             return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables),
-                    isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables), getClusterManagerType(variables));
+                    isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables), getClusterManagerType(variables), isRepair(variables));
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -469,6 +471,10 @@ public class ClusterUpscaleActions {
 
         Boolean isKerberosSecured(Map<Object, Object> variables) {
             return (Boolean) variables.get(KERBEROS_SECURED);
+        }
+
+        Boolean isRepair(Map<Object, Object> variables) {
+            return (Boolean) variables.get(REPAIR);
         }
 
         Boolean isSingleNodeCluster(Map<Object, Object> variables) {

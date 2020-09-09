@@ -94,7 +94,7 @@ public class ClusterUpscaleService {
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
     }
 
-    public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
+    public void installServicesOnNewHosts(Long stackId, String hostGroupName, Boolean repair) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
@@ -103,6 +103,14 @@ public class ClusterUpscaleService {
         recipeEngine.executePostAmbariStartRecipes(stack, hostGroup.getRecipes());
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
+        if (repair) {
+            try {
+                LOGGER.info("Trying to restart services");
+                connector.restartAll();
+            } catch (RuntimeException e) {
+                LOGGER.info("Restart services failed", e);
+            }
+        }
         runningInstanceMetaDataSet.stream()
                 .filter(instanceMetaData -> upscaledHosts.contains(instanceMetaData.getDiscoveryFQDN()))
                 .forEach(instanceMetaData -> {

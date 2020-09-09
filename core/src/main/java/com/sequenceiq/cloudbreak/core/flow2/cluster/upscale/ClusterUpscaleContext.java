@@ -16,14 +16,17 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     private final ClusterManagerType clusterManagerType;
 
+    private final Boolean repair;
+
     public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway,
-            String hostName, ClusterManagerType clusterManagerType) {
+            String hostName, ClusterManagerType clusterManagerType, Boolean repair) {
         super(flowParameters, stack);
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;
         primaryGatewayHostName = hostName;
         this.clusterManagerType = clusterManagerType;
+        this.repair = repair;
     }
 
     public String getHostGroupName() {
@@ -45,4 +48,9 @@ public class ClusterUpscaleContext extends ClusterViewContext {
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
     }
+
+    public Boolean isRepair() {
+        return repair;
+    }
+
 }

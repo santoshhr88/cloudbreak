@@ -4,7 +4,15 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScale
 
 public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
-    public UpscaleClusterRequest(Long stackId, String hostGroupName) {
+    private boolean repair;
+
+    public UpscaleClusterRequest(Long stackId, String hostGroupName, boolean repair) {
         super(stackId, hostGroupName);
+        this.repair = repair;
     }
+
+    public boolean isRepair() {
+        return repair;
+    }
+
 }
