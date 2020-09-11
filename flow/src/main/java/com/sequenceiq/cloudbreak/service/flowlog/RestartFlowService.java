@@ -51,11 +51,11 @@ public class RestartFlowService {
         return stackIdsUnderOperation;
     }
 
-    public void purgeTerminatedResourceFlowLogs() throws TransactionService.TransactionExecutionException {
+    public void purgeFinalisedFlowLogs() throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
-            LOGGER.debug("Cleaning deleted stack's flowlog");
-            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedResourceLogs();
-            LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
+            LOGGER.debug("Cleaning finalised flowlogs");
+            int purgedFinalizedFlowLogs = flowLogService.purgeFinalizedFlowLogs();
+            LOGGER.debug("Deleted flowlog count: {}", purgedFinalizedFlowLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
             LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);

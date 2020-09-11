@@ -28,9 +28,9 @@ public class EnvironmentCleanupService implements ApplicationListener<ContextRef
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
         try {
-            restartFlowService.purgeTerminatedResourceFlowLogs();
+            restartFlowService.purgeFinalisedFlowLogs();
         } catch (Exception e) {
-            LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
+            LOGGER.error("Cleanup operation failed. Shutting down the node. ", e);
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) event.getApplicationContext();
             applicationContext.close();
         }
